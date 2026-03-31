@@ -616,3 +616,172 @@ a { color: inherit; text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ─── SPLASH SCREEN ─────────────────────────────────── */
+#splash {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #06070f;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), visibility 0.7s;
+}
+#splash.hidden {
+  opacity: 0; visibility: hidden; pointer-events: none;
+}
+#splash-stars {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+/* Orbit rings */
+.splash-orbit {
+  position: absolute; top: 50%; left: 50%;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.05);
+  transform-origin: center center;
+  animation: splash-spin linear infinite;
+}
+.splash-orbit-1 { width: 260px; height: 260px; margin: -130px 0 0 -130px; animation-duration: 9s; }
+.splash-orbit-2 { width: 380px; height: 380px; margin: -190px 0 0 -190px; animation-duration: 15s; animation-direction: reverse; border-color: rgba(240,147,74,0.08); }
+.splash-orbit-3 { width: 520px; height: 520px; margin: -260px 0 0 -260px; animation-duration: 22s; }
+
+@keyframes splash-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Orbiting dots */
+.splash-orb {
+  position: absolute; top: -4px; left: 50%; margin-left: -4px;
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.splash-orb-gold   { background: #c5a352; box-shadow: 0 0 10px 3px #c5a35280; }
+.splash-orb-orange { background: #f0934a; box-shadow: 0 0 12px 4px #f0934a80; width: 10px; height: 10px; top: -5px; margin-left: -5px; }
+.splash-orb-blue   { background: #4a8fd4; box-shadow: 0 0 8px 2px #4a8fd460; }
+
+/* Center content */
+.splash-center {
+  position: relative; z-index: 10;
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  text-align: center;
+}
+
+/* Logo */
+.splash-logo-wrap {
+  position: relative; width: 100px; height: 100px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 28px;
+}
+.splash-logo { width: 90px; height: 90px; }
+.splash-logo-pulse {
+  position: absolute; inset: -12px;
+  border-radius: 50%;
+  border: 1px solid rgba(197,163,82,0.2);
+  animation: splash-pulse 2.4s ease-in-out infinite;
+}
+@keyframes splash-pulse {
+  0%,100% { transform: scale(1); opacity: 0.4; }
+  50%      { transform: scale(1.12); opacity: 0.1; }
+}
+
+/* Wordmark */
+.splash-wordmark {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #e4e6f5;
+  margin-bottom: 10px;
+}
+.splash-accent { color: #f0934a; }
+
+/* Tagline */
+.splash-tagline {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(240,147,74,0.5);
+  margin-bottom: 32px;
+}
+
+/* Progress bar */
+.splash-bar-wrap {
+  width: 220px; height: 2px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.splash-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #c5a352, #f0934a);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px #f0934a60;
+}
+
+/* Status text */
+.splash-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(122,126,154,0.6);
+  min-height: 14px;
+  transition: opacity 0.3s;
+}
+
+/* Corner decorations */
+.splash-corner {
+  position: absolute;
+  width: 20px; height: 20px;
+}
+.splash-corner::before,
+.splash-corner::after {
+  content: ''; position: absolute;
+  background: rgba(240,147,74,0.35);
+}
+.splash-corner::before { width: 100%; height: 1px; }
+.splash-corner::after  { width: 1px; height: 100%; }
+.splash-corner-tl { top: 24px; left: 24px; }
+.splash-corner-tl::before { top: 0; left: 0; }
+.splash-corner-tl::after  { top: 0; left: 0; }
+.splash-corner-tr { top: 24px; right: 24px; }
+.splash-corner-tr::before { top: 0; right: 0; }
+.splash-corner-tr::after  { top: 0; right: 0; }
+.splash-corner-bl { bottom: 24px; left: 24px; }
+.splash-corner-bl::before { bottom: 0; left: 0; }
+.splash-corner-bl::after  { bottom: 0; left: 0; }
+.splash-corner-br { bottom: 24px; right: 24px; }
+.splash-corner-br::before { bottom: 0; right: 0; }
+.splash-corner-br::after  { bottom: 0; right: 0; }
+
+/* ─── ORANGE ACCENT ENHANCEMENTS ────────────────────── */
+
+/* SpaceX section — use orange as the section accent */
+#tab-spacex .section-header-badge { background: rgba(240,147,74,0.12); color: var(--orange); border-color: rgba(240,147,74,0.3); }
+#tab-spacex .stat-card:nth-child(3) .stat-value,
+#tab-spacex .stat-card:nth-child(4) .stat-value { color: var(--orange); }
+
+/* Ticker — alternate accent dot */
+.ticker-item:nth-child(odd)::before { color: var(--orange); }
+
+/* Nav tab active indicator — subtle orange underline for SpaceX tab */
+[data-tab="tab-spacex"].active { color: var(--orange); border-bottom-color: var(--orange); }
+
+/* NEO hazard badge */
+.neo-hazard.hazard-yes { background: rgba(240,147,74,0.15); color: var(--orange); border: 1px solid rgba(240,147,74,0.4); }
+
+/* Stat card accent border — orange variant */
+.card.accent-orange,
+.stat-card.accent-orange { border-left-color: var(--orange); }
+
+/* Refresh button hover */
+.refresh-btn:hover { color: var(--orange); }
+
+/* Data source footer pill — SpaceX */
+.source-pill[data-src="spacex"] { background: rgba(240,147,74,0.08); color: var(--orange); border-color: rgba(240,147,74,0.25); }
+
+/* Back-home link — orange on hover when over SpaceX section */
+.back-home-link:hover { color: var(--orange); border-color: var(--orange); background: color-mix(in srgb, var(--orange) 8%, transparent); }

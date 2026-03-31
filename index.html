@@ -11,6 +11,59 @@
 </head>
 <body>
 
+<!-- ─── SPLASH SCREEN ─── -->
+<div id="splash" aria-hidden="true">
+  <canvas id="splash-stars"></canvas>
+
+  <!-- Orbit rings -->
+  <div class="splash-orbit splash-orbit-1">
+    <div class="splash-orb splash-orb-gold"></div>
+  </div>
+  <div class="splash-orbit splash-orbit-2">
+    <div class="splash-orb splash-orb-orange"></div>
+  </div>
+  <div class="splash-orbit splash-orbit-3">
+    <div class="splash-orb splash-orb-blue"></div>
+  </div>
+
+  <!-- Center content -->
+  <div class="splash-center">
+    <!-- SVG logo mark -->
+    <div class="splash-logo-wrap">
+      <svg class="splash-logo" viewBox="0 0 80 80" fill="none" aria-hidden="true">
+        <circle cx="40" cy="40" r="38" stroke="#c5a352" stroke-width="1" opacity="0.3"/>
+        <circle cx="40" cy="40" r="24" stroke="#4a8fd4" stroke-width="1" opacity="0.4"/>
+        <ellipse cx="40" cy="40" rx="38" ry="12" stroke="#f0934a" stroke-width="1.2" opacity="0.5" transform="rotate(-25 40 40)"/>
+        <circle cx="40" cy="40" r="7" fill="#c5a352" opacity="0.9"/>
+        <circle cx="40" cy="40" r="3.5" fill="#fff" opacity="0.7"/>
+        <circle cx="64" cy="22" r="2.5" fill="#4a8fd4" opacity="0.9"/>
+        <circle cx="17" cy="60" r="2" fill="#f0934a" opacity="0.9"/>
+        <circle cx="58" cy="56" r="1.5" fill="#4ec994" opacity="0.9"/>
+      </svg>
+      <div class="splash-logo-pulse"></div>
+    </div>
+
+    <div class="splash-wordmark">
+      Space<span class="splash-accent">Asist</span>
+    </div>
+    <div class="splash-tagline">// SPACE INTELLIGENCE — INITIALIZING</div>
+
+    <!-- Progress bar -->
+    <div class="splash-bar-wrap">
+      <div class="splash-bar" id="splash-bar"></div>
+    </div>
+
+    <!-- Live data status lines -->
+    <div class="splash-status" id="splash-status">Connecting to NASA APOD...</div>
+  </div>
+
+  <!-- Corner decorations -->
+  <div class="splash-corner splash-corner-tl"></div>
+  <div class="splash-corner splash-corner-tr"></div>
+  <div class="splash-corner splash-corner-bl"></div>
+  <div class="splash-corner splash-corner-br"></div>
+</div>
+
 <!-- Stars -->
 <canvas id="star-canvas" aria-hidden="true"></canvas>
 
@@ -475,5 +528,84 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/api.js"></script>
 <script src="js/main.js"></script>
+
+<!-- ─── SPLASH LOGIC ─── -->
+<script>
+(function() {
+  const splash    = document.getElementById('splash');
+  const bar       = document.getElementById('splash-bar');
+  const statusEl  = document.getElementById('splash-status');
+  const canvas    = document.getElementById('splash-stars');
+  const ctx       = canvas.getContext('2d');
+
+  // ---- starfield on splash canvas ----
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  window.addEventListener('resize', () => {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+  const stars = Array.from({ length: 200 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.3 + 0.2,
+    o: Math.random() * 0.6 + 0.1,
+    s: Math.random() * 0.4 + 0.05,
+  }));
+  let tick = 0, raf;
+  function drawStars() {
+    tick++;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(st => {
+      const pulse = st.o + Math.sin(tick * st.s * 0.05) * 0.18;
+      ctx.beginPath();
+      ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,' + Math.min(pulse, 1) + ')';
+      ctx.fill();
+    });
+    raf = requestAnimationFrame(drawStars);
+  }
+  drawStars();
+
+  // ---- progress sequence ----
+  const steps = [
+    { pct: 15,  msg: 'Connecting to NASA APOD...' },
+    { pct: 30,  msg: 'Loading ISS position...' },
+    { pct: 48,  msg: 'Fetching SpaceX missions...' },
+    { pct: 62,  msg: 'Scanning near-Earth objects...' },
+    { pct: 76,  msg: 'Querying exoplanet archive...' },
+    { pct: 88,  msg: 'Loading image gallery...' },
+    { pct: 100, msg: 'Systems online — welcome aboard.' },
+  ];
+
+  let stepIdx = 0;
+  const STEP_MS = 320;
+
+  function nextStep() {
+    if (stepIdx >= steps.length) {
+      // short pause then dismiss
+      setTimeout(dismiss, 480);
+      return;
+    }
+    const step = steps[stepIdx++];
+    bar.style.width = step.pct + '%';
+    statusEl.textContent = step.msg;
+    setTimeout(nextStep, STEP_MS);
+  }
+
+  // Small delay so fonts load before animating
+  setTimeout(nextStep, 200);
+
+  function dismiss() {
+    cancelAnimationFrame(raf);
+    splash.classList.add('hidden');
+    // Remove from DOM after transition
+    splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+  }
+
+  // Allow clicking to skip
+  splash.addEventListener('click', dismiss);
+})();
+</script>
 </body>
 </html>
