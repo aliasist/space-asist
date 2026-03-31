@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpaceData — Live Space Intelligence Dashboard</title>
+  <meta name="description" content="Live data from NASA, Hubble, JWST, SpaceX, ISS, and more. Real-time asteroid tracking, exoplanet discovery, and space exploration data.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛸</text></svg>">
+</head>
+<body>
+
+<!-- Stars -->
+<canvas id="star-canvas" aria-hidden="true"></canvas>
+
+<!-- ─── HEADER ─── -->
+<header class="site-header">
+  <div class="logo">
+    <!-- SVG Logo -->
+    <svg class="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <circle cx="16" cy="16" r="15" stroke="#c5a352" stroke-width="1" opacity="0.4"/>
+      <circle cx="16" cy="16" r="8" stroke="#4a8fd4" stroke-width="1" opacity="0.5"/>
+      <!-- Orbit ring -->
+      <ellipse cx="16" cy="16" rx="15" ry="5" stroke="#4ec994" stroke-width="1" opacity="0.4" transform="rotate(-30 16 16)"/>
+      <!-- Center dot -->
+      <circle cx="16" cy="16" r="3" fill="#c5a352"/>
+      <!-- Satellites -->
+      <circle cx="26" cy="9" r="1.5" fill="#4a8fd4" opacity="0.8"/>
+      <circle cx="7" cy="25" r="1" fill="#e05555" opacity="0.8"/>
+    </svg>
+    Space<em>Data</em>
+  </div>
+  <div class="header-right">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      Live
+    </div>
+    <div class="last-updated" id="last-updated">--:--:--</div>
+    <button class="refresh-btn" id="refresh-btn" title="Refresh data" aria-label="Refresh">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M1 4v6h6M23 20v-6h-6"/>
+        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- ─── TICKER ─── -->
+<div class="stat-ticker">
+  <div class="ticker-inner" id="ticker-inner">
+    <div class="ticker-item">Loading live data…</div>
+  </div>
+</div>
+
+<!-- ─── NAV TABS ─── -->
+<nav class="nav-tabs" role="tablist">
+  <button class="nav-tab active" data-tab="tab-apod" role="tab">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    Astronomy Picture
+  </button>
+  <button class="nav-tab" data-tab="tab-iss" role="tab">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+    ISS Tracker
+  </button>
+  <button class="nav-tab" data-tab="tab-spacex" role="tab">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+    SpaceX
+  </button>
+  <button class="nav-tab" data-tab="tab-neo" role="tab">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24M14.83 14.83l4.24 4.24M14.83 9.17l4.24-4.24M4.93 19.07l4.24-4.24"/></svg>
+    Asteroids
+  </button>
+  <button class="nav-tab" data-tab="tab-exo" role="tab">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    Exoplanets
+  </button>
+  <button class="nav-tab" data-tab="tab-gallery" role="tab">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 9 4-4 4 4 4-4 4 4M3 15l4 4 4-4 4 4 4-4"/></svg>
+    Image Gallery
+  </button>
+</nav>
+
+<!-- ─── MAIN ─── -->
+<main class="main-content">
+
+  <!-- ══════════════ APOD ══════════════ -->
+  <section class="section-panel active" id="tab-apod">
+    <div class="section-header">
+      <div class="section-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Astronomy Picture of the Day</div>
+        <div class="section-subtitle">Curated daily by NASA astronomers since 1995</div>
+      </div>
+      <span class="section-badge badge-nasa">NASA · APOD</span>
+    </div>
+
+    <div class="apod-grid">
+      <div class="apod-image-wrap">
+        <img id="apod-img" src="" alt="Astronomy Picture of the Day" loading="lazy">
+        <div class="apod-image-overlay">
+          <span class="apod-date-badge">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span id="apod-date">Loading…</span>
+          </span>
+        </div>
+      </div>
+      <div class="apod-info">
+        <div class="apod-source-tag">NASA · Astronomy Picture of the Day</div>
+        <h2 class="apod-title" id="apod-title">
+          <div class="skel-text skeleton wide" style="height:1.8em"></div>
+        </h2>
+        <p class="apod-explanation" id="apod-explanation">
+          <span class="skel-text skeleton wide"></span>
+          <span class="skel-text skeleton wide"></span>
+          <span class="skel-text skeleton short"></span>
+        </p>
+        <p class="apod-credit" id="apod-credit"></p>
+
+        <div class="grid-2" style="margin-top:auto">
+          <div class="card accent-blue">
+            <div class="card-title">Source</div>
+            <div style="font-size:var(--text-sm);font-weight:600">NASA APOD</div>
+            <div class="card-sub">apod.nasa.gov</div>
+          </div>
+          <div class="card accent-accent">
+            <div class="card-title">Updated</div>
+            <div style="font-size:var(--text-sm);font-weight:600">Daily</div>
+            <div class="card-sub">Since Jun 16, 1995</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ ISS ══════════════ -->
+  <section class="section-panel" id="tab-iss">
+    <div class="section-header">
+      <div class="section-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/></svg>
+      </div>
+      <div>
+        <div class="section-title">ISS Live Tracker</div>
+        <div class="section-subtitle">Real-time position updated every 5 seconds</div>
+      </div>
+      <span class="section-badge badge-live">Live · 5s updates</span>
+    </div>
+
+    <!-- Stat row -->
+    <div class="grid-4" style="margin-bottom:var(--space-5)">
+      <div class="card accent-green">
+        <div class="card-title">Crew Aboard</div>
+        <div class="card-value" id="crew-count">—</div>
+        <div class="card-sub">People in space (all crafts)</div>
+      </div>
+      <div class="card accent-blue">
+        <div class="card-title">Orbital Altitude</div>
+        <div class="card-value">~408</div>
+        <div class="card-sub">km above Earth</div>
+      </div>
+      <div class="card accent-orange">
+        <div class="card-title">Orbital Speed</div>
+        <div class="card-value">28,000</div>
+        <div class="card-sub">km/h · 17,500 mph</div>
+      </div>
+      <div class="card accent-purple">
+        <div class="card-title">Orbits / Day</div>
+        <div class="card-value">~15.5</div>
+        <div class="card-sub">Every 92 minutes</div>
+      </div>
+    </div>
+
+    <div class="iss-grid">
+      <div class="iss-map-wrap">
+        <div id="iss-map"></div>
+        <div class="iss-map-overlay">
+          <div class="iss-coords">
+            LAT: <span id="iss-lat">…</span><br>
+            LNG: <span id="iss-lng">…</span><br>
+            UPD: <span id="iss-ts">…</span>
+          </div>
+        </div>
+      </div>
+      <div class="iss-info">
+        <div class="card accent-teal">
+          <div class="card-title">Currently Aboard</div>
+          <div id="crew-list" class="crew-list">
+            <div class="skel-text skeleton wide"></div>
+            <div class="skel-text skeleton wide"></div>
+            <div class="skel-text skeleton wide"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Station Facts</div>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:var(--text-sm)">
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Launch</span><strong>Nov 20, 1998</strong></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Mass</span><strong>420,000 kg</strong></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Length</span><strong>109 m</strong></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Partners</span><strong>NASA · Roscosmos · ESA · JAXA · CSA</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ SPACEX ══════════════ -->
+  <section class="section-panel" id="tab-spacex">
+    <div class="section-header">
+      <div class="section-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+      </div>
+      <div>
+        <div class="section-title">SpaceX Mission Control</div>
+        <div class="section-subtitle">Launches, rockets, landing pads, and orbital assets</div>
+      </div>
+      <span class="section-badge badge-spacex">SpaceX API</span>
+    </div>
+
+    <!-- Key stats -->
+    <div class="grid-4" style="margin-bottom:var(--space-5)">
+      <div class="card accent-red">
+        <div class="card-title">Total Launches</div>
+        <div class="card-value" id="sx-total">—</div>
+        <div class="card-sub">Since Falcon 1, 2006</div>
+      </div>
+      <div class="card accent-green">
+        <div class="card-title">Successful</div>
+        <div class="card-value" id="sx-success">—</div>
+        <div class="card-sub">Mission successes</div>
+      </div>
+      <div class="card accent-accent">
+        <div class="card-title">Success Rate</div>
+        <div class="card-value" id="sx-rate">—</div>
+        <div class="card-sub">Falcon 9: 98%+</div>
+      </div>
+      <div class="card accent-orange">
+        <div class="card-title">Active Cores</div>
+        <div class="card-value" id="sx-cores-active">—</div>
+        <div class="card-sub">Max reuses: <span id="sx-cores-max">—</span></div>
+      </div>
+    </div>
+
+    <!-- Company + Roadster -->
+    <div class="grid-4" style="margin-bottom:var(--space-5)">
+      <div class="card accent-teal">
+        <div class="card-title">Employees</div>
+        <div class="card-value" id="sx-co-employees">—</div>
+        <div class="card-sub">Founded <span id="sx-co-founded">—</span></div>
+      </div>
+      <div class="card accent-purple">
+        <div class="card-title">Valuation</div>
+        <div class="card-value" id="sx-co-valuation">—</div>
+        <div class="card-sub">Private company</div>
+      </div>
+      <div class="card accent-yellow">
+        <div class="card-title">Roadster Speed</div>
+        <div class="card-value" id="sx-roadster-speed" style="font-size:var(--text-xl)">—</div>
+        <div class="card-sub">Tesla in solar orbit</div>
+      </div>
+      <div class="card accent-blue">
+        <div class="card-title">Roadster from Earth</div>
+        <div class="card-value" id="sx-roadster-earth" style="font-size:var(--text-xl)">—</div>
+        <div class="card-sub">From Mars: <span id="sx-roadster-mars">—</span></div>
+      </div>
+    </div>
+
+    <!-- Launches bar chart + list -->
+    <div class="grid-2" style="margin-bottom:var(--space-5)">
+      <div class="chart-wrap">
+        <div class="chart-title">Launches Per Year</div>
+        <div class="bar-chart" id="sx-bar-chart"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Booster Stats</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:var(--text-sm)">
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Total Cores Tracked</span><strong id="sx-cores-total">—</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Record Reuses</span><strong id="sx-cores-max2">—</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Total Failures</span><strong id="sx-fail">—</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Starlink Satellites</span><strong>3,526+</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Roadster Orbit Period</span><strong id="sx-roadster-period">—</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+    <div class="section-header" style="margin-bottom:var(--space-4)">
+      <div><div class="section-title" style="font-size:var(--text-lg)">Rockets</div></div>
+    </div>
+    <div class="grid-4" id="sx-rockets-grid" style="margin-bottom:var(--space-5)">
+      <!-- Injected by JS -->
+    </div>
+
+    <hr class="section-divider">
+    <div class="section-header" style="margin-bottom:var(--space-4)">
+      <div><div class="section-title" style="font-size:var(--text-lg)">Landing Pads</div></div>
+    </div>
+    <div class="landpad-grid" id="sx-landpads-grid" style="margin-bottom:var(--space-5)">
+      <!-- Injected by JS -->
+    </div>
+
+    <hr class="section-divider">
+    <div class="section-header" style="margin-bottom:var(--space-4)">
+      <div><div class="section-title" style="font-size:var(--text-lg)">Recent Launches</div></div>
+    </div>
+    <div class="launch-list" id="sx-launches-list">
+      <!-- Injected by JS -->
+    </div>
+  </section>
+
+  <!-- ══════════════ NEO ══════════════ -->
+  <section class="section-panel" id="tab-neo">
+    <div class="section-header">
+      <div class="section-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24M14.83 14.83l4.24 4.24M14.83 9.17l4.24-4.24M4.93 19.07l4.24-4.24"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Near-Earth Object Tracker</div>
+        <div class="section-subtitle">NASA JPL asteroid close-approach data — updated daily</div>
+      </div>
+      <span class="section-badge badge-nasa">NASA · NeoWs</span>
+    </div>
+
+    <div class="grid-4" style="margin-bottom:var(--space-5)">
+      <div class="card accent-orange">
+        <div class="card-title">NEO Catalog</div>
+        <div class="card-value" id="neo-total">—</div>
+        <div class="card-sub">Total known objects</div>
+      </div>
+      <div class="card accent-teal">
+        <div class="card-title">Today's Approaches</div>
+        <div class="card-value" id="neo-today">—</div>
+        <div class="card-sub">Passing Earth today</div>
+      </div>
+      <div class="card accent-red">
+        <div class="card-title">Potentially Hazardous</div>
+        <div class="card-value" id="neo-hazardous">—</div>
+        <div class="card-sub">In today's list</div>
+      </div>
+      <div class="card accent-blue">
+        <div class="card-title">Total Approaches</div>
+        <div class="card-value" id="neo-approaches" style="font-size:var(--text-xl)">—</div>
+        <div class="card-sub">Recorded in database</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="chart-wrap" style="margin-bottom:var(--space-4)">
+          <div class="chart-title">Today's Asteroids — Radar View</div>
+          <div class="neo-radar-wrap">
+            <canvas id="neo-canvas" style="max-width:100%"></canvas>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:12px;font-size:11px">
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block"></span>Safe</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:var(--red);display:inline-block"></span>Potentially Hazardous (PHA)</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:var(--blue);display:inline-block"></span>Earth</span>
+          </div>
+        </div>
+      </div>
+      <div id="neo-list" class="neo-list">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ EXOPLANETS ══════════════ -->
+  <section class="section-panel" id="tab-exo">
+    <div class="section-header">
+      <div class="section-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Exoplanet Archive</div>
+        <div class="section-subtitle">NASA Exoplanet Archive · Caltech IPAC · Updated continuously</div>
+      </div>
+      <span class="section-badge badge-exo">NASA · IPAC</span>
+    </div>
+
+    <div class="exo-counter-wrap">
+      <div class="exo-counter">
+        <div class="exo-count-value" id="exo-count-value">0</div>
+        <div class="exo-count-label">Confirmed Exoplanets</div>
+        <div class="exo-count-sub">As of today — NASA Exoplanet Archive (IPAC)</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:var(--space-6)">
+      <div class="card accent-purple">
+        <div class="card-title">Discovery Methods</div>
+        <div id="exo-methods" style="margin-top:var(--space-4)">
+          <div class="skel-text skeleton wide"></div>
+          <div class="skel-text skeleton wide"></div>
+          <div class="skel-text skeleton short"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Key Milestones</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:var(--text-sm);margin-top:var(--space-3)">
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">First confirmed exoplanet</span><strong>1992 (PSR 1257+12)</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">First Sun-like host</span><strong>1995 (51 Pegasi b)</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Kepler mission (2009)</span><strong>2,600+ discoveries</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">TESS mission (2018)</span><strong>400+ confirmed</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Habitable zone candidates</span><strong>60+</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">JWST atmospheres studied</span><strong>Growing list</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="overflow-x:auto">
+      <div class="card-title" style="margin-bottom:var(--space-4)">Recently Discovered Exoplanets</div>
+      <table class="exo-table">
+        <thead>
+          <tr>
+            <th>Planet</th>
+            <th>Host Star</th>
+            <th>Year</th>
+            <th>Orbital Period</th>
+            <th>Radius</th>
+            <th>Mass</th>
+            <th>Distance</th>
+            <th>Method</th>
+          </tr>
+        </thead>
+        <tbody id="exo-table-body">
+          <tr><td colspan="8"><div class="skel-text skeleton wide"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════ GALLERY ══════════════ -->
+  <section class="section-panel" id="tab-gallery">
+    <div class="section-header">
+      <div class="section-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Space Image Gallery</div>
+        <div class="section-subtitle">Hubble · James Webb · Mars Rovers · NASA Archives</div>
+      </div>
+      <span class="section-badge badge-nasa">NASA Images API</span>
+    </div>
+    <div class="gallery-grid" id="gallery-grid">
+      <!-- Injected by JS -->
+    </div>
+  </section>
+
+</main>
+
+<!-- ─── DATA SOURCES FOOTER ─── -->
+<footer class="data-sources">
+  <span style="color:var(--text-muted);margin-right:var(--space-2)">Data sources:</span>
+  <span class="data-source-tag">🔭 NASA APOD</span>
+  <span class="data-source-tag">🛸 Open Notify (ISS)</span>
+  <span class="data-source-tag">🚀 SpaceX API</span>
+  <span class="data-source-tag">☄️ NASA NeoWs</span>
+  <span class="data-source-tag">🌍 NASA Exoplanet Archive (IPAC)</span>
+  <span class="data-source-tag">📸 NASA Images API</span>
+  <span class="data-source-tag">🏛 MAST / STScI</span>
+  <span style="margin-left:auto;color:var(--text-faint)">Data refreshes on page load · ISS updates every 5s</span>
+</footer>
+
+<!-- ─── SCRIPTS ─── -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
