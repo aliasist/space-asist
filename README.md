@@ -2,7 +2,9 @@
 
 **Live space intelligence dashboard** pulling real-time data from NASA, SpaceX, ISS, and more.
 
-🔗 **[Live Demo](https://www.perplexity.ai/computer/a/spacedata-live-space-intellige-XQ_9tQUkTCOHrggWRGuyDw)**
+🔗 **[space.aliasist.com](https://space.aliasist.com)** · [Live Demo](https://www.perplexity.ai/computer/a/spacedata-live-space-intellige-XQ_9tQUkTCOHrggWRGuyDw)
+
+Part of the [Aliasist](https://www.aliasist.com) project suite.
 
 ---
 
@@ -23,6 +25,29 @@
 
 ---
 
+## Deploy (Cloudflare Pages)
+
+Pushes to `main` auto-deploy to Cloudflare Pages via GitHub Actions.
+
+### First-time setup — add two repo secrets
+
+Go to `github.com/aliasist/space-asist` → **Settings → Secrets and variables → Actions → New repository secret**
+
+| Secret name | Where to get it |
+|-------------|-----------------|
+| `CLOUDFLARE_API_TOKEN` | [dash.cloudflare.com](https://dash.cloudflare.com) → My Profile → API Tokens → Create Token → use the **"Edit Cloudflare Workers"** template |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → right sidebar on any zone page — labeled **Account ID** |
+
+Once both secrets are added, push any commit to `main` and the action deploys automatically.
+
+### Add the custom domain
+
+After the first successful deploy, in Cloudflare Dashboard:
+1. **Workers & Pages** → `space-asist` → **Custom domains** → Add `space.aliasist.com`
+2. Cloudflare auto-creates the DNS record — done.
+
+---
+
 ## APIs Used
 
 | API | Endpoint | Auth |
@@ -34,7 +59,7 @@
 | SpaceX REST v4/v5 | `api.spacexdata.com` | None |
 | NASA IPAC Exoplanets | `exoplanetarchive.ipac.caltech.edu/TAP/sync` | None |
 
-> **Note:** NASA `DEMO_KEY` is rate-limited to 30 requests/hour per IP. For heavier usage, get a free key at [api.nasa.gov](https://api.nasa.gov) and replace `DEMO_KEY` in `js/api.js`.
+> **NASA rate limits:** `DEMO_KEY` allows 30 req/hour per IP. For heavier use, get a free key at [api.nasa.gov](https://api.nasa.gov) and swap it in `js/api.js` line 4.
 
 ---
 
@@ -42,32 +67,30 @@
 
 ```
 space-asist/
-├── index.html       # Full 6-tab dashboard HTML
-├── css/
-│   └── style.css    # Deep-space dark theme (601 lines)
-└── js/
-    ├── api.js       # All API endpoints abstracted into window.API
-    └── main.js      # Dashboard logic — tabs, renderers, canvas, charts
+├── index.html                   # Full 6-tab dashboard
+├── css/style.css                # Deep-space dark theme
+├── js/
+│   ├── api.js                   # All API endpoints (window.API)
+│   └── main.js                  # Dashboard logic, tabs, canvas, charts
+└── .github/workflows/deploy.yml # Auto-deploy to Cloudflare Pages
 ```
 
 ---
 
 ## Running Locally
 
-No build step needed — just serve the folder:
-
 ```bash
 npx serve . -l 3000
-# or
-python3 -m http.server 3000
+# open http://localhost:3000
 ```
-
-Then open `http://localhost:3000`.
 
 ---
 
-## Part of the Aliasist Project Bundle
+## Part of the Aliasist Suite
 
-Built by [Aliasist](https://github.com/aliasist) alongside:
-- [stockmarket](https://github.com/aliasist/stockmarket) — Aliasist Pulse finance dashboard
-- [datasist](https://github.com/aliasist/datasist) — AI data center intelligence map
+| App | URL |
+|-----|-----|
+| aliasist.com | [aliasist.com](https://www.aliasist.com) |
+| PulseSist | [pulse.aliasist.com](https://pulse.aliasist.com) |
+| DataSist | [datasist-frontend.pages.dev](https://datasist-frontend.pages.dev) |
+| SpaceAsist | [space.aliasist.com](https://space.aliasist.com) |
