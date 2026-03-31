@@ -142,8 +142,9 @@ async function loadISS() {
   const updateISSPos = async () => {
     const pos = await API.getISSPosition();
     if (!pos) return;
-    const lat = parseFloat(pos.iss_position.latitude);
-    const lng = parseFloat(pos.iss_position.longitude);
+    // wheretheiss.at returns flat {latitude, longitude} (no iss_position wrapper)
+    const lat = parseFloat(pos.latitude);
+    const lng = parseFloat(pos.longitude);
 
     issMarker.setLatLng([lat, lng]);
     issPath.push([lat, lng]);
@@ -205,9 +206,10 @@ async function loadSpaceX() {
   // Stat cards
   if (launches) {
     const total   = launches.length;
+    // success can be null for very old entries — only count definite values
     const success = launches.filter(l => l.success === true).length;
     const fail    = launches.filter(l => l.success === false).length;
-    const rate    = Math.round(success / (success + fail) * 100);
+    const rate    = (success + fail) > 0 ? Math.round(success / (success + fail) * 100) : 0;
     setVal('sx-total', fmt(total));
     setVal('sx-success', fmt(success));
     setVal('sx-fail', fmt(fail));
@@ -341,6 +343,7 @@ function buildLaunchList(id, launches, upcoming = false) {
     if (upcoming) { statusClass = 'status-upcoming'; statusText = 'Upcoming'; }
     else if (l.success === true) { statusClass = 'status-success'; statusText = 'Success'; }
     else if (l.success === false) { statusClass = 'status-failure'; statusText = 'Failure'; }
+    else if (l.success === null || l.success === undefined) { statusClass = 'status-unknown'; statusText = 'Unknown'; }
 
     item.innerHTML = `
       <div class="launch-num">
@@ -681,8 +684,9 @@ async function loadTicker(launches) {
   const inner = document.getElementById('ticker-inner');
   if (!inner || !launches) return;
   const total   = launches.length;
+  const fail    = launches.filter(l => l.success === false).length;
   const success = launches.filter(l => l.success === true).length;
-  const rate    = Math.round(success / total * 100);
+  const rate    = (success + fail) > 0 ? Math.round(success / (success + fail) * 100) : 0;
   const last    = launches[launches.length - 1];
 
   const items = [

@@ -4,7 +4,7 @@
 const NASA_KEY = 'DEMO_KEY';
 const SPACEX   = 'https://api.spacexdata.com';
 const NASA     = 'https://api.nasa.gov';
-const OPEN_N   = 'http://api.open-notify.org';
+const WHERETHEISS = 'https://api.wheretheiss.at/v1/satellites/25544';
 const EXO      = 'https://exoplanetarchive.ipac.caltech.edu/TAP/sync';
 const NASA_IMG = 'https://images-api.nasa.gov';
 
@@ -48,14 +48,16 @@ const API = {
     return fetchJSON(`${NASA_IMG}/search?q=james+webb+space+telescope+galaxy&media_type=image&page_size=8`);
   },
 
-  // ─── Open Notify (ISS) ─────────────────────────────────
+  // ─── ISS Position (wheretheiss.at) ────────────────────
 
   async getISSPosition() {
-    return fetchJSON(`${OPEN_N}/iss-now.json`);
+    // Returns { latitude, longitude, altitude, velocity, timestamp, ... }
+    return fetchJSON(WHERETHEISS);
   },
 
   async getAstronauts() {
-    return fetchJSON(`${OPEN_N}/astros.json`);
+    // open-notify /astros.json is still operational for crew data
+    return fetchJSON('https://corquaid.github.io/international-space-station-APIs/JSON/people-in-space.json');
   },
 
   // ─── SpaceX ────────────────────────────────────────────
