@@ -108,6 +108,23 @@ a { color: inherit; text-decoration: none; }
 .logo-mark { width: 32px; height: 32px; }
 .logo em { color: var(--accent); font-style: normal; }
 
+.back-home-link {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.back-home-link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
 .header-right {
   display: flex; align-items: center; gap: var(--space-5);
 }
@@ -594,6 +611,7 @@ a { color: inherit; text-decoration: none; }
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
   .section-panel { padding: var(--space-4); }
   .site-header { padding: 0 var(--space-4); }
+  .back-home-link { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
