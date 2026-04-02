@@ -753,6 +753,31 @@ async function init() {
   document.getElementById('refresh-btn')?.addEventListener('click', refreshAll);
 }
 
-document.readyState === 'loading'
-  ? document.addEventListener('DOMContentLoaded', init)
-  : init();
+// Only auto-start in a real browser; not during Node/Jest test runs
+if (typeof module === 'undefined') {
+  document.readyState === 'loading'
+    ? document.addEventListener('DOMContentLoaded', init)
+    : init();
+}
+
+// Allow Node.js / Jest to import utilities for testing
+if (typeof module !== 'undefined') {
+  module.exports = {
+    fmt,
+    fmtDate,
+    fmtDateShort,
+    el,
+    skeletonCards,
+    setVal,
+    buildBarChart,
+    buildLaunchList,
+    methodColor,
+    methodBadgeClass,
+    animateCount,
+    loadTicker,
+    loadNEO,
+    loadSpaceX,
+    loadAPOD,
+    loadExoplanets,
+  };
+}

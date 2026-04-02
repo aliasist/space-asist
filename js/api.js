@@ -110,4 +110,7 @@ const API = {
 
 };
 
-window.API = API;
+if (typeof window !== 'undefined') window.API = API;
+
+// Allow Node.js / Jest to import for testing
+if (typeof module !== 'undefined') module.exports = { fetchJSON, API };
