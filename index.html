@@ -3,8 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SpaceData — Live Space Intelligence Dashboard</title>
-  <meta name="description" content="Live data from NASA, Hubble, JWST, SpaceX, ISS, and more. Real-time asteroid tracking, exoplanet discovery, and space exploration data.">
+  <title>SpaceSist by Aliasist — Live Space Intelligence Dashboard</title>
+  <meta name="description" content="SpaceSist by Aliasist — live data from NASA, Hubble, JWST, SpaceX, ISS, and more. Real-time asteroid tracking, exoplanet discovery, and space exploration data.">
+  <meta name="author" content="Aliasist">
+  <link rel="canonical" href="https://space.aliasist.com">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://space.aliasist.com">
+  <meta property="og:title" content="SpaceSist by Aliasist — Live Space Intelligence Dashboard">
+  <meta property="og:description" content="Real-time data from NASA, SpaceX, ISS, and more. Asteroid tracking, exoplanet archive, Hubble &amp; JWST gallery — all in one dashboard.">
+  <meta property="og:image" content="https://space.aliasist.com/og-image.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SpaceSist by Aliasist — Live Space Intelligence Dashboard">
+  <meta name="twitter:description" content="Real-time data from NASA, SpaceX, ISS, and more. Asteroid tracking, exoplanet archive, Hubble &amp; JWST gallery.">
+  <meta name="twitter:image" content="https://space.aliasist.com/og-image.png">
+
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛸</text></svg>">
@@ -44,9 +60,9 @@
     </div>
 
     <div class="splash-wordmark">
-      Space<span class="splash-accent">Asist</span>
+      Space<span class="splash-accent">Sist</span>
     </div>
-    <div class="splash-tagline">// SPACE INTELLIGENCE — INITIALIZING</div>
+    <div class="splash-tagline">// BY ALIASIST — INITIALIZING</div>
 
     <!-- Progress bar -->
     <div class="splash-bar-wrap">
@@ -82,7 +98,10 @@
       <circle cx="26" cy="9" r="1.5" fill="#4a8fd4" opacity="0.8"/>
       <circle cx="7" cy="25" r="1" fill="#e05555" opacity="0.8"/>
     </svg>
-    Space<em>Data</em>
+    <div class="logo-text">
+      Space<em>Sist</em>
+      <span class="logo-by">by Aliasist</span>
+    </div>
   </div>
 
   <!-- Back to aliasist.com -->
@@ -116,28 +135,28 @@
 </div>
 
 <!-- ─── NAV TABS ─── -->
-<nav class="nav-tabs" role="tablist">
-  <button class="nav-tab active" data-tab="tab-apod" role="tab">
+<nav class="nav-tabs" role="tablist" aria-label="Space data sections">
+  <button class="nav-tab active" data-tab="tab-apod" role="tab" aria-selected="true" aria-controls="tab-apod">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
     Astronomy Picture
   </button>
-  <button class="nav-tab" data-tab="tab-iss" role="tab">
+  <button class="nav-tab" data-tab="tab-iss" role="tab" aria-selected="false" aria-controls="tab-iss">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
     ISS Tracker
   </button>
-  <button class="nav-tab" data-tab="tab-spacex" role="tab">
+  <button class="nav-tab" data-tab="tab-spacex" role="tab" aria-selected="false" aria-controls="tab-spacex">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
     SpaceX
   </button>
-  <button class="nav-tab" data-tab="tab-neo" role="tab">
+  <button class="nav-tab" data-tab="tab-neo" role="tab" aria-selected="false" aria-controls="tab-neo">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24M14.83 14.83l4.24 4.24M14.83 9.17l4.24-4.24M4.93 19.07l4.24-4.24"/></svg>
     Asteroids
   </button>
-  <button class="nav-tab" data-tab="tab-exo" role="tab">
+  <button class="nav-tab" data-tab="tab-exo" role="tab" aria-selected="false" aria-controls="tab-exo">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     Exoplanets
   </button>
-  <button class="nav-tab" data-tab="tab-gallery" role="tab">
+  <button class="nav-tab" data-tab="tab-gallery" role="tab" aria-selected="false" aria-controls="tab-gallery">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 9 4-4 4 4 4-4 4 4M3 15l4 4 4-4 4 4 4-4"/></svg>
     Image Gallery
   </button>
@@ -147,7 +166,8 @@
 <main class="main-content">
 
   <!-- ══════════════ APOD ══════════════ -->
-  <section class="section-panel active" id="tab-apod">
+  <section class="section-panel active" id="tab-apod" role="tabpanel" aria-labelledby="tab-apod">
+    <div id="apod-error" class="section-error" role="alert" hidden></div>
     <div class="section-header">
       <div class="section-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -198,7 +218,8 @@
   </section>
 
   <!-- ══════════════ ISS ══════════════ -->
-  <section class="section-panel" id="tab-iss">
+  <section class="section-panel" id="tab-iss" role="tabpanel" aria-labelledby="tab-iss">
+    <div id="iss-error" class="section-error" role="alert" hidden></div>
     <div class="section-header">
       <div class="section-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/></svg>
@@ -243,6 +264,9 @@
             LNG: <span id="iss-lng">…</span><br>
             UPD: <span id="iss-ts">…</span>
           </div>
+          <button class="iss-copy-btn" id="iss-copy-btn" title="Copy coordinates to clipboard" aria-label="Copy ISS coordinates">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
         </div>
       </div>
       <div class="iss-info">
@@ -268,7 +292,8 @@
   </section>
 
   <!-- ══════════════ SPACEX ══════════════ -->
-  <section class="section-panel" id="tab-spacex">
+  <section class="section-panel" id="tab-spacex" role="tabpanel" aria-labelledby="tab-spacex">
+    <div id="spacex-error" class="section-error" role="alert" hidden></div>
     <div class="section-header">
       <div class="section-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
@@ -278,6 +303,29 @@
         <div class="section-subtitle">Launches, rockets, landing pads, and orbital assets</div>
       </div>
       <span class="section-badge badge-spacex">SpaceX API</span>
+    </div>
+
+    <!-- Next Launch highlight -->
+    <div id="sx-next-launch" class="next-launch-card" style="display:none;margin-bottom:var(--space-5)">
+      <div class="next-launch-badge">Next Launch</div>
+      <div class="next-launch-body">
+        <div class="next-launch-name" id="nl-name">—</div>
+        <div class="next-launch-meta">
+          <span id="nl-rocket">—</span>
+          <span class="next-launch-sep">·</span>
+          <span id="nl-date">—</span>
+        </div>
+      </div>
+      <div class="next-launch-countdown" id="nl-countdown" aria-live="polite">
+        <div class="countdown-block"><span class="countdown-val" id="nl-days">--</span><span class="countdown-lbl">days</span></div>
+        <div class="countdown-block"><span class="countdown-val" id="nl-hours">--</span><span class="countdown-lbl">hrs</span></div>
+        <div class="countdown-block"><span class="countdown-val" id="nl-mins">--</span><span class="countdown-lbl">min</span></div>
+        <div class="countdown-block"><span class="countdown-val" id="nl-secs">--</span><span class="countdown-lbl">sec</span></div>
+      </div>
+      <a id="nl-webcast" class="next-launch-watch" href="#" target="_blank" rel="noopener" style="display:none">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Watch Live
+      </a>
     </div>
 
     <!-- Key stats -->
@@ -369,10 +417,45 @@
     <div class="launch-list" id="sx-launches-list">
       <!-- Injected by JS -->
     </div>
+
+    <hr class="section-divider">
+    <div class="section-header" style="margin-bottom:var(--space-4)">
+      <div>
+        <div class="section-title" style="font-size:var(--text-lg)">Starlink Constellation</div>
+        <div class="section-subtitle" style="font-size:var(--text-xs)">Live satellite counts from SpaceX API</div>
+      </div>
+    </div>
+    <div id="starlink-error" class="section-error" role="alert" hidden></div>
+    <div class="grid-4" style="margin-bottom:var(--space-5)">
+      <div class="card accent-blue">
+        <div class="card-title">Total Launched</div>
+        <div class="card-value" id="sl-total">—</div>
+        <div class="card-sub">All Starlink satellites</div>
+      </div>
+      <div class="card accent-green">
+        <div class="card-title">Active</div>
+        <div class="card-value" id="sl-active">—</div>
+        <div class="card-sub">Currently operational</div>
+      </div>
+      <div class="card accent-red">
+        <div class="card-title">Decayed / Lost</div>
+        <div class="card-value" id="sl-decayed">—</div>
+        <div class="card-sub">De-orbited or inactive</div>
+      </div>
+      <div class="card accent-orange">
+        <div class="card-title">Unique Launches</div>
+        <div class="card-value" id="sl-launches">—</div>
+        <div class="card-sub">Starlink rideshare missions</div>
+      </div>
+    </div>
+    <div class="starlink-visual-wrap">
+      <canvas id="starlink-canvas" aria-label="Starlink constellation map"></canvas>
+    </div>
   </section>
 
   <!-- ══════════════ NEO ══════════════ -->
-  <section class="section-panel" id="tab-neo">
+  <section class="section-panel" id="tab-neo" role="tabpanel" aria-labelledby="tab-neo">
+    <div id="neo-error" class="section-error" role="alert" hidden></div>
     <div class="section-header">
       <div class="section-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24M14.83 14.83l4.24 4.24M14.83 9.17l4.24-4.24M4.93 19.07l4.24-4.24"/></svg>
@@ -428,7 +511,8 @@
   </section>
 
   <!-- ══════════════ EXOPLANETS ══════════════ -->
-  <section class="section-panel" id="tab-exo">
+  <section class="section-panel" id="tab-exo" role="tabpanel" aria-labelledby="tab-exo">
+    <div id="exo-error" class="section-error" role="alert" hidden></div>
     <div class="section-header">
       <div class="section-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -493,7 +577,8 @@
   </section>
 
   <!-- ══════════════ GALLERY ══════════════ -->
-  <section class="section-panel" id="tab-gallery">
+  <section class="section-panel" id="tab-gallery" role="tabpanel" aria-labelledby="tab-gallery">
+    <div id="gallery-error" class="section-error" role="alert" hidden></div>
     <div class="section-header">
       <div class="section-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
@@ -511,17 +596,61 @@
 
 </main>
 
-<!-- ─── DATA SOURCES FOOTER ─── -->
-<footer class="data-sources">
-  <span style="color:var(--text-muted);margin-right:var(--space-2)">Data sources:</span>
-  <span class="data-source-tag">🔭 NASA APOD</span>
-  <span class="data-source-tag">🛸 Open Notify (ISS)</span>
-  <span class="data-source-tag">🚀 SpaceX API</span>
-  <span class="data-source-tag">☄️ NASA NeoWs</span>
-  <span class="data-source-tag">🌍 NASA Exoplanet Archive (IPAC)</span>
-  <span class="data-source-tag">📸 NASA Images API</span>
-  <span class="data-source-tag">🏛 MAST / STScI</span>
-  <span style="margin-left:auto;color:var(--text-faint)">Data refreshes on page load · ISS updates every 5s</span>
+<!-- ─── FOOTER ─── -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <svg class="footer-logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="16" cy="16" r="15" stroke="#c5a352" stroke-width="1" opacity="0.4"/>
+        <circle cx="16" cy="16" r="8" stroke="#4a8fd4" stroke-width="1" opacity="0.5"/>
+        <ellipse cx="16" cy="16" rx="15" ry="5" stroke="#4ec994" stroke-width="1" opacity="0.4" transform="rotate(-30 16 16)"/>
+        <circle cx="16" cy="16" r="3" fill="#c5a352"/>
+        <circle cx="26" cy="9" r="1.5" fill="#4a8fd4" opacity="0.8"/>
+        <circle cx="7" cy="25" r="1" fill="#e05555" opacity="0.8"/>
+      </svg>
+      <div>
+        <div class="footer-brand-name">Space<span>Sist</span></div>
+        <div class="footer-brand-sub">by <a href="https://www.aliasist.com">Aliasist</a></div>
+      </div>
+    </div>
+
+    <div class="footer-suite">
+      <div class="footer-suite-label">Aliasist Suite</div>
+      <div class="footer-suite-links">
+        <a href="https://www.aliasist.com" class="footer-suite-link">
+          <span class="footer-suite-dot" style="background:var(--accent)"></span>
+          aliasist.com
+        </a>
+        <a href="https://pulse.aliasist.com" class="footer-suite-link">
+          <span class="footer-suite-dot" style="background:var(--red)"></span>
+          PulseSist
+        </a>
+        <a href="https://datasist-frontend.pages.dev" class="footer-suite-link">
+          <span class="footer-suite-dot" style="background:var(--blue)"></span>
+          DataSist
+        </a>
+        <a href="https://space.aliasist.com" class="footer-suite-link footer-suite-link-active">
+          <span class="footer-suite-dot" style="background:var(--green)"></span>
+          SpaceSist
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-data-sources">
+      <div class="footer-suite-label">Data Sources</div>
+      <div class="footer-sources-list">
+        <span class="data-source-tag">🔭 NASA APOD</span>
+        <span class="data-source-tag">🛸 ISS Tracker</span>
+        <span class="data-source-tag">🚀 SpaceX API</span>
+        <span class="data-source-tag">☄️ NASA NeoWs</span>
+        <span class="data-source-tag">🌍 NASA IPAC</span>
+        <span class="data-source-tag">📸 NASA Images</span>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Aliasist · Data refreshes on page load · ISS updates every 5 s</span>
+  </div>
 </footer>
 
 <!-- ─── SCRIPTS ─── -->

@@ -40,17 +40,49 @@ function initTabs() {
   const tabs   = document.querySelectorAll('.nav-tab');
   const panels = document.querySelectorAll('.section-panel');
 
+  function activateTab(target) {
+    tabs.forEach(t => {
+      const active = t.dataset.tab === target;
+      t.classList.toggle('active', active);
+      t.setAttribute('aria-selected', active ? 'true' : 'false');
+      t.tabIndex = active ? 0 : -1;
+    });
+    panels.forEach(p => p.classList.toggle('active', p.id === target));
+    // Redraw NEO radar after panel becomes visible
+    if (target === 'tab-neo' && window._neoObjects) {
+      requestAnimationFrame(() => drawNEORadar('neo-canvas', window._neoObjects));
+    }
+  }
+
   tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const target = tab.dataset.tab;
-      tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === target));
-      panels.forEach(p => p.classList.toggle('active', p.id === target));
-      // Redraw NEO radar after panel becomes visible (offsetWidth is now > 0)
-      if (target === 'tab-neo' && window._neoObjects) {
-        requestAnimationFrame(() => drawNEORadar('neo-canvas', window._neoObjects));
+    tab.addEventListener('click', () => activateTab(tab.dataset.tab));
+    tab.addEventListener('keydown', e => {
+      const tabList = Array.from(tabs);
+      const idx = tabList.indexOf(tab);
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        const next = tabList[(idx + 1) % tabList.length];
+        next.focus();
+        activateTab(next.dataset.tab);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const prev = tabList[(idx - 1 + tabList.length) % tabList.length];
+        prev.focus();
+        activateTab(prev.dataset.tab);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        tabList[0].focus();
+        activateTab(tabList[0].dataset.tab);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        tabList[tabList.length - 1].focus();
+        activateTab(tabList[tabList.length - 1].dataset.tab);
       }
     });
   });
+
+  // Set initial tabindex
+  tabs.forEach((t, i) => { t.tabIndex = i === 0 ? 0 : -1; });
 }
 
 // ─── Last Updated ──────────────────────────────────────
@@ -88,10 +120,23 @@ function skeletonCards(container, count, height = '') {
   }
 }
 
+function showSectionError(id, message = '⚠ Failed to load data — click Refresh to retry') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = message;
+  el.hidden = false;
+}
+
+function clearSectionError(id) {
+  const el = document.getElementById(id);
+  if (el) el.hidden = true;
+}
+
 // ─── APOD ───────────────────────────────────────────────
 async function loadAPOD() {
   const data = await API.getAPOD();
-  if (!data) return;
+  if (!data) { showSectionError('apod-error'); return; }
+  clearSectionError('apod-error');
 
   const imgEl = document.getElementById('apod-img');
   const titleEl = document.getElementById('apod-title');
@@ -141,7 +186,8 @@ async function loadISS() {
 
   const updateISSPos = async () => {
     const pos = await API.getISSPosition();
-    if (!pos) return;
+    if (!pos) { showSectionError('iss-error'); return; }
+    clearSectionError('iss-error');
     // wheretheiss.at returns flat {latitude, longitude} (no iss_position wrapper)
     const lat = parseFloat(pos.latitude);
     const lng = parseFloat(pos.longitude);
@@ -190,6 +236,20 @@ async function loadISS() {
       });
     }
   }
+
+  // Copy coordinates button
+  const copyBtn = document.getElementById('iss-copy-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const lat = document.getElementById('iss-lat')?.textContent || '';
+      const lng = document.getElementById('iss-lng')?.textContent || '';
+      const text = `ISS Position — LAT: ${lat}, LNG: ${lng}`;
+      navigator.clipboard?.writeText(text).then(() => {
+        copyBtn.classList.add('copied');
+        setTimeout(() => copyBtn.classList.remove('copied'), 1500);
+      });
+    });
+  }
 }
 
 // ─── SpaceX ─────────────────────────────────────────────
@@ -202,6 +262,12 @@ async function loadSpaceX() {
     API.getSpaceXCompany(),
     API.getSpaceXRoadster(),
   ]);
+
+  if (!launches && !rockets && !cores && !company) {
+    showSectionError('spacex-error');
+  } else {
+    clearSectionError('spacex-error');
+  }
 
   // Stat cards
   if (launches) {
@@ -364,6 +430,12 @@ function buildLaunchList(id, launches, upcoming = false) {
 // ─── NEO Asteroids ──────────────────────────────────────
 async function loadNEO() {
   const [neoFeed, neoStats] = await Promise.all([API.getNEO(), API.getNEOStats()]);
+
+  if (!neoFeed && !neoStats) {
+    showSectionError('neo-error');
+  } else {
+    clearSectionError('neo-error');
+  }
 
   if (neoStats) {
     setVal('neo-total', fmt(neoStats.near_earth_object_count));
@@ -537,6 +609,12 @@ async function loadExoplanets() {
     API.getExoByMethod(),
   ]);
 
+  if (!countData && !planets && !methods) {
+    showSectionError('exo-error');
+  } else {
+    clearSectionError('exo-error');
+  }
+
   // IPAC returns column names that may vary; try multiple keys with fallback
   if (countData && countData.length > 0) {
     const row = countData[0];
@@ -632,6 +710,12 @@ async function loadGallery() {
   if (!container) return;
   container.innerHTML = '';
 
+  if (!hubble && !jwst && !mars) {
+    showSectionError('gallery-error');
+    return;
+  }
+  clearSectionError('gallery-error');
+
   const addItems = (data, source) => {
     if (!data?.collection?.items) return;
     data.collection.items.forEach(item => {
@@ -677,6 +761,142 @@ async function loadGallery() {
       container.appendChild(card);
     });
   }
+}
+
+// ─── Next Launch ────────────────────────────────────────
+let _nlCountdownInterval = null;
+
+async function loadNextLaunch() {
+  const upcoming = await API.getSpaceXUpcoming();
+  if (!upcoming || upcoming.length === 0) return;
+
+  // Find the soonest launch with a confirmed date
+  const sorted = [...upcoming]
+    .filter(l => l.date_utc)
+    .sort((a, b) => new Date(a.date_utc) - new Date(b.date_utc));
+  const next = sorted[0];
+  if (!next) return;
+
+  // Resolve rocket name
+  const rockets = await API.getSpaceXRockets();
+  const rocketName = rockets?.find(r => r.id === next.rocket)?.name || 'Unknown Rocket';
+
+  const card = document.getElementById('sx-next-launch');
+  if (!card) return;
+  card.style.display = 'flex';
+
+  setVal('nl-name', next.name);
+  setVal('nl-rocket', rocketName);
+  setVal('nl-date', fmtDate(next.date_utc));
+
+  const webcastLink = document.getElementById('nl-webcast');
+  if (webcastLink && next.links?.webcast) {
+    webcastLink.href = next.links.webcast;
+    webcastLink.style.display = 'inline-flex';
+  }
+
+  const launchTime = new Date(next.date_utc).getTime();
+
+  function updateCountdown() {
+    const diff = launchTime - Date.now();
+    if (diff <= 0) {
+      setVal('nl-days', '00');
+      setVal('nl-hours', '00');
+      setVal('nl-mins', '00');
+      setVal('nl-secs', '00');
+      clearInterval(_nlCountdownInterval);
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    setVal('nl-days',  String(d).padStart(2, '0'));
+    setVal('nl-hours', String(h).padStart(2, '0'));
+    setVal('nl-mins',  String(m).padStart(2, '0'));
+    setVal('nl-secs',  String(s).padStart(2, '0'));
+  }
+
+  updateCountdown();
+  clearInterval(_nlCountdownInterval);
+  _nlCountdownInterval = setInterval(updateCountdown, 1000);
+}
+
+// ─── Starlink ────────────────────────────────────────────
+async function loadStarlink() {
+  const satellites = await API.getSpaceXStarlink();
+  if (!satellites) { showSectionError('starlink-error'); return; }
+  clearSectionError('starlink-error');
+
+  const total   = satellites.length;
+  const active  = satellites.filter(s => s.spaceTrack?.DECAY_DATE === null && s.spaceTrack?.OBJECT_TYPE === 'PAYLOAD').length;
+  const decayed = satellites.filter(s => s.spaceTrack?.DECAY_DATE !== null && s.spaceTrack?.DECAY_DATE !== undefined).length;
+
+  // Count unique launch IDs
+  const launchIds = new Set(satellites.map(s => s.launch).filter(Boolean));
+
+  setVal('sl-total',   fmt(total));
+  setVal('sl-active',  fmt(active));
+  setVal('sl-decayed', fmt(decayed));
+  setVal('sl-launches', fmt(launchIds.size));
+
+  drawStarlinkCanvas(satellites);
+}
+
+function drawStarlinkCanvas(satellites) {
+  const canvas = document.getElementById('starlink-canvas');
+  if (!canvas) return;
+  const W = canvas.width  = canvas.parentElement.offsetWidth || 800;
+  const H = canvas.height = Math.min(W * 0.4, 280);
+  const ctx = canvas.getContext('2d');
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background gradient
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#0c0e1a');
+  bg.addColorStop(1, '#06070f');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw Earth in center
+  const cx = W / 2, cy = H / 2;
+  const earthR = Math.min(W, H) * 0.12;
+  const earthGrd = ctx.createRadialGradient(cx - earthR * 0.3, cy - earthR * 0.3, 0, cx, cy, earthR);
+  earthGrd.addColorStop(0, '#4a8fd4');
+  earthGrd.addColorStop(1, '#1a3a6e');
+  ctx.beginPath();
+  ctx.arc(cx, cy, earthR, 0, Math.PI * 2);
+  ctx.fillStyle = earthGrd;
+  ctx.fill();
+
+  // Draw orbit ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, earthR + 18, 0, Math.PI * 2);
+  ctx.strokeStyle = '#1e214040';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Plot a representative sample of satellites as dots around orbit rings
+  const sample = satellites.slice(0, 300);
+  const ringR = earthR + 18;
+  sample.forEach((sat, i) => {
+    const angle = (i / sample.length) * Math.PI * 2;
+    // Vary radius slightly per satellite for visual depth
+    const r = ringR + (((i * 7) % 5) - 2) * 2;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r * 0.45; // flatten for perspective
+    const decayed = sat.spaceTrack?.DECAY_DATE !== null && sat.spaceTrack?.DECAY_DATE !== undefined;
+    ctx.beginPath();
+    ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = decayed ? '#e0555570' : '#4a8fd4cc';
+    ctx.fill();
+  });
+
+  // Legend
+  ctx.font = '11px JetBrains Mono, monospace';
+  ctx.fillStyle = '#3d4060';
+  ctx.fillText(`${Math.min(sample.length, satellites.length)} of ${satellites.length} satellites shown`, 12, H - 10);
 }
 
 // ─── Ticker ─────────────────────────────────────────────
@@ -738,17 +958,19 @@ async function init() {
   setInterval(updateTimestamp, 1000);
 
   // Load all data in parallel
-  const [, , , launches] = await Promise.all([
+  await Promise.all([
     loadAPOD(),
     loadISS(),
     loadSpaceX(),
-    (async () => { const l = await API.getSpaceXLaunches(); await loadTicker(l); return l; })(),
+    (async () => { const l = await API.getSpaceXLaunches(); await loadTicker(l); })(),
   ]);
 
   // Load lighter sections slightly deferred
   loadNEO();
   loadExoplanets();
   loadGallery();
+  loadNextLaunch();
+  loadStarlink();
 
   document.getElementById('refresh-btn')?.addEventListener('click', refreshAll);
 }

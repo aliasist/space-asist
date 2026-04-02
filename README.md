@@ -1,4 +1,4 @@
-# 🛸 Space-Asist
+# 🛸 SpaceSist by Aliasist
 
 **Live space intelligence dashboard** pulling real-time data from NASA, SpaceX, ISS, and more.
 
@@ -13,8 +13,8 @@ Part of the [Aliasist](https://www.aliasist.com) project suite.
 | Tab | Data Source | What it shows |
 |-----|-------------|---------------|
 | 🌌 **Astronomy Picture** | NASA APOD | Daily astronomy image with full description |
-| 🛰️ **ISS Tracker** | Open Notify | Live ISS position (updates every 5s), crew list, orbital stats |
-| 🚀 **SpaceX** | SpaceX REST API | 205 launches, success rate, rockets, boosters, Tesla Roadster position |
+| 🛰️ **ISS Tracker** | wheretheiss.at | Live ISS position (updates every 5s), crew list, orbital stats, copy-coords button |
+| 🚀 **SpaceX** | SpaceX REST API | Launches, success rate, rockets, boosters, Next Launch countdown, Starlink constellation |
 | ☄️ **Asteroids** | NASA NeoWs | Today's close-approach objects on radar canvas, 42,777+ NEO catalog |
 | 🪐 **Exoplanets** | NASA IPAC | 6,153+ confirmed planets, discovery methods, recent finds table |
 | 🔭 **Image Gallery** | NASA Images API | Hubble, JWST, Mars rover photos from NASA archives |
@@ -22,6 +22,8 @@ Part of the [Aliasist](https://www.aliasist.com) project suite.
 - **Live ticker** scrolling key stats across the top
 - **Starfield canvas** animated background
 - **Fully static** — pure HTML/CSS/JS, no backend, no build step
+- **Session caching** — API responses cached (5 min default, 30 s for ISS) to conserve NASA rate limits
+- **Error state UI** — per-section banners on API failure
 
 ---
 
@@ -93,4 +95,4 @@ npx serve . -l 3000
 | aliasist.com | [aliasist.com](https://www.aliasist.com) |
 | PulseSist | [pulse.aliasist.com](https://pulse.aliasist.com) |
 | DataSist | [datasist-frontend.pages.dev](https://datasist-frontend.pages.dev) |
-| SpaceAsist | [space.aliasist.com](https://space.aliasist.com) |
+| SpaceSist | [space.aliasist.com](https://space.aliasist.com) |
