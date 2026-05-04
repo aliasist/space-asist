@@ -49,6 +49,12 @@ function initTabs() {
       if (target === 'tab-neo' && window._neoObjects) {
         requestAnimationFrame(() => drawNEORadar('neo-canvas', window._neoObjects));
       }
+      if (target === 'tab-iss' && issMap) {
+        requestAnimationFrame(() => {
+          issMap.invalidateSize();
+          focusISSMap(true);
+        });
+      }
     });
   });
 }
@@ -120,7 +126,55 @@ async function loadAPOD() {
 let issMap = null;
 let issMarker = null;
 let issPath = [];
+let issUpdateTimer = null;
+let issHasCentered = false;
+let issLastUpdateAt = 0;
+let issModalOpen = false;
 const ISS_TRAIL_LENGTH = 30;
+
+function focusISSMap(force = false) {
+  if (!issMap || !issMarker) return;
+  const latLng = issMarker.getLatLng();
+  if (!Number.isFinite(latLng.lat) || !Number.isFinite(latLng.lng)) return;
+
+  if (force || !issHasCentered) {
+    issMap.setView([latLng.lat, latLng.lng], 2, { animate: false });
+    issHasCentered = true;
+    return;
+  }
+
+  issMap.panTo([latLng.lat, latLng.lng], { animate: true, duration: 0.8 });
+}
+
+function setISSFollowStatus(message) {
+  const el = document.getElementById('iss-follow-status');
+  if (el) el.textContent = message;
+}
+
+function syncISSModal(open) {
+  const wrap = document.getElementById('iss-map-wrap');
+  const backdrop = document.getElementById('iss-map-modal-backdrop');
+  const closeBtn = document.getElementById('iss-map-modal-close');
+  if (!wrap || !backdrop || !closeBtn) return;
+
+  issModalOpen = open;
+  wrap.classList.toggle('is-modal-open', open);
+  backdrop.hidden = !open;
+  closeBtn.hidden = !open;
+  document.body.style.overflow = open ? 'hidden' : '';
+
+  requestAnimationFrame(() => {
+    if (issMap) {
+      issMap.invalidateSize();
+      focusISSMap(true);
+    }
+  });
+}
+
+function openISSModal() {
+  if (issModalOpen) return;
+  syncISSModal(true);
+}
 
 async function loadISS() {
   // Load Leaflet map once
@@ -137,14 +191,46 @@ async function loadISS() {
       iconSize: [28, 28], iconAnchor: [14, 14]
     });
     issMarker = L.marker([0, 0], { icon: issIcon }).addTo(issMap);
+
+    document.getElementById('iss-recenter-btn')?.addEventListener('click', () => {
+      focusISSMap(true);
+      setISSFollowStatus('Centered on ISS');
+      window.setTimeout(() => setISSFollowStatus('Tracking live orbit'), 1600);
+    });
+
+    const wrap = document.getElementById('iss-map-wrap');
+    const backdrop = document.getElementById('iss-map-modal-backdrop');
+    const closeBtn = document.getElementById('iss-map-modal-close');
+    const expandBtn = document.getElementById('iss-expand-btn');
+
+    expandBtn?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      openISSModal();
+    });
+    backdrop?.addEventListener('click', () => syncISSModal(false));
+    closeBtn?.addEventListener('click', () => syncISSModal(false));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && issModalOpen) {
+        syncISSModal(false);
+      }
+    });
   }
 
   const updateISSPos = async () => {
     const pos = await API.getISSPosition();
-    if (!pos) return;
+    if (!pos) {
+      setISSFollowStatus('Live signal unavailable');
+      return;
+    }
     // wheretheiss.at returns flat {latitude, longitude} (no iss_position wrapper)
     const lat = parseFloat(pos.latitude);
     const lng = parseFloat(pos.longitude);
+    const timestamp = Number(pos.timestamp);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      setISSFollowStatus('Waiting for valid coordinates');
+      return;
+    }
 
     issMarker.setLatLng([lat, lng]);
     issPath.push([lat, lng]);
@@ -152,6 +238,9 @@ async function loadISS() {
 
     if (issMap._trailLine) issMap.removeLayer(issMap._trailLine);
     issMap._trailLine = L.polyline(issPath, { color: '#4ec99460', weight: 2, dashArray: '4 4' }).addTo(issMap);
+    focusISSMap(!issHasCentered);
+    issLastUpdateAt = Date.now();
+    setISSFollowStatus('Tracking live orbit');
 
     // Update coords display
     const latEl = document.getElementById('iss-lat');
@@ -160,11 +249,19 @@ async function loadISS() {
     if (lngEl) lngEl.textContent = lng.toFixed(4) + '°';
 
     const tsEl = document.getElementById('iss-ts');
-    if (tsEl) tsEl.textContent = new Date(pos.timestamp * 1000).toLocaleTimeString();
+    if (tsEl) tsEl.textContent = Number.isFinite(timestamp)
+      ? new Date(timestamp * 1000).toLocaleTimeString()
+      : new Date().toLocaleTimeString();
   };
 
   await updateISSPos();
-  setInterval(updateISSPos, 5000);
+  if (issUpdateTimer) clearInterval(issUpdateTimer);
+  issUpdateTimer = setInterval(async () => {
+    await updateISSPos();
+    if (Date.now() - issLastUpdateAt > 15000) {
+      setISSFollowStatus('Signal delayed');
+    }
+  }, 5000);
 
   // Crew
   const crew = await API.getAstronauts();

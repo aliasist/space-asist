@@ -115,6 +115,25 @@
   </div>
 </div>
 
+<section class="mobile-mission-showcase" aria-label="Mobile mission slides">
+  <article class="mission-slide">
+    <div class="mission-slide-media" style="background-image: linear-gradient(180deg, rgba(5,8,16,0.08), rgba(5,8,16,0.86)), url('assets/cinematic/spacesist-orbital-mission-hero.png');"></div>
+    <div class="mission-slide-copy">
+      <span class="mission-slide-kicker">Mission View</span>
+      <strong>Orbital intelligence, cleaner on mobile.</strong>
+      <span>Open the suite with a calmer entry into live ISS, launch, and image feeds.</span>
+    </div>
+  </article>
+  <article class="mission-slide">
+    <div class="mission-slide-media" style="background-image: linear-gradient(180deg, rgba(5,8,16,0.12), rgba(5,8,16,0.9)), url('assets/cinematic/spacesist-orbital-mission-hero.png'); background-position: center 35%;"></div>
+    <div class="mission-slide-copy">
+      <span class="mission-slide-kicker">Live Surfaces</span>
+      <strong>NASA imagery and ISS tracking stay within thumb reach.</strong>
+      <span>Swipe, scan, and jump into the live panels without hitting a wall of cards first.</span>
+    </div>
+  </article>
+</section>
+
 <!-- ─── NAV TABS ─── -->
 <nav class="nav-tabs" role="tablist">
   <button class="nav-tab active" data-tab="tab-apod" role="tab">
@@ -235,13 +254,34 @@
     </div>
 
     <div class="iss-grid">
-      <div class="iss-map-wrap">
+      <div class="iss-map-wrap" id="iss-map-wrap">
         <div id="iss-map"></div>
+        <div class="iss-map-hud">
+          <div class="iss-map-status">
+            <span class="iss-status-dot"></span>
+            <span id="iss-follow-status">Tracking live orbit</span>
+          </div>
+          <button class="iss-map-action iss-map-expand" id="iss-expand-btn" type="button" aria-label="Expand ISS map">
+            Expand
+          </button>
+          <button class="iss-map-action" id="iss-recenter-btn" type="button" aria-label="Recenter ISS map">
+            Recenter
+          </button>
+        </div>
         <div class="iss-map-overlay">
-          <div class="iss-coords">
-            LAT: <span id="iss-lat">…</span><br>
-            LNG: <span id="iss-lng">…</span><br>
-            UPD: <span id="iss-ts">…</span>
+          <div class="iss-coords-grid">
+            <div class="iss-coord-block">
+              <span class="iss-coord-label">Lat</span>
+              <strong id="iss-lat">…</strong>
+            </div>
+            <div class="iss-coord-block">
+              <span class="iss-coord-label">Lng</span>
+              <strong id="iss-lng">…</strong>
+            </div>
+            <div class="iss-coord-block iss-coord-block-wide">
+              <span class="iss-coord-label">Updated</span>
+              <strong id="iss-ts">…</strong>
+            </div>
           </div>
         </div>
       </div>
@@ -510,6 +550,11 @@
   </section>
 
 </main>
+
+<div class="iss-map-modal-backdrop" id="iss-map-modal-backdrop" hidden aria-hidden="true"></div>
+<button class="iss-map-modal-close" id="iss-map-modal-close" type="button" hidden aria-label="Close expanded ISS map">
+  Close
+</button>
 
 <!-- ─── DATA SOURCES FOOTER ─── -->
 <footer class="data-sources">
